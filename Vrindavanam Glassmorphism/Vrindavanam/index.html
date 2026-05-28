@@ -186,6 +186,14 @@
             flex-wrap: wrap !important;
             margin-top: 2.5rem !important;
         }
+
+        @media (max-width: 640px) {
+            .hero-ctas {
+                flex-direction: column !important;
+                gap: 1rem !important;
+                width: 100% !important;
+            }
+        }
     </style>
 </head>
 
@@ -206,6 +214,11 @@
             <li><a href="#contact">Contact</a></li>
         </ul>
         <div class="nav-right">
+            <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <button class="cart-btn" onclick="openCart()">
                 🛒 Cart
                 <span class="cart-count" id="cartCount">0</span>
