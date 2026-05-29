@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vrindhavanam Estate Heritage Since 1932 — Heritage Spices Since 1932</title>
+    <title>Vrindhavanam Estate — Heritage Spices Since 1932</title>
     <meta name="description"
         content="Premium organic spices from our heritage plantation. Farm-to-table transparency, batch-traced, since 1932.">
-    <meta property="og:title" content="Vrindhavanam Estate Heritage Since 1932 — Heritage Spices Since 1932">
+    <meta property="og:title" content="Vrindhavanam Estate — Heritage Spices Since 1932">
     <meta property="og:description" content="Premium organic spices from our heritage plantation.">
 
     <!-- Fonts -->
@@ -19,7 +19,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css?v=3">
-    <link rel="stylesheet" href="css/components.css?v=3">
+    <link rel="stylesheet" href="css/components.css?v=6">
     <link rel="stylesheet" href="css/animations.css">
 
     <!-- Luxury Visual Enhancements -->
@@ -202,8 +202,8 @@
     <!-- NAV -->
     <nav id="navbar">
         <div class="nav-logo">
-            🌿 Vrindhavanam Estate Heritage Since 1932
-            <span>Heritage Since 1932</span>
+            🌿 <span class="brand-lockup"><span class="brand-title">Vrindhavanam Estate</span><span
+                    class="brand-subtitle">Heritage Since 1932</span></span>
         </div>
         <ul class="nav-links">
             <li><a href="#hero">Home</a></li>
@@ -315,7 +315,7 @@
                     </div>
 
                     <div class="gen-card">
-                        <img src="images/grow.jpg" alt="Second Generation Growth" loading="lazy">
+                        <img src="images/growlegacy2.jpg" alt="Second Generation Growth" loading="lazy">
                         <div class="gen-card-body">
                             <h3>Growing Legacy</h3>
                             <p>Expanding with care, preserving family values and achieving chemical-free certification.
@@ -471,42 +471,43 @@
     <div class="section-eyebrow">Our Handpicked Spices</div>
     <h2 class="section-title">Handpicked <em>Spices</em></h2>
     <div class="handpicked-grid">
-        <a id="product-cardamom" class="handpicked-tile" style="background-image:url('images/plantation17.jpg');">
+        <a id="product-cardamom" class="handpicked-tile" href="cardamom.html" style="background-image:url('images/plantation17.jpg');">
             <span class="tile-badge">Single Origin</span>
             <span class="tile-name">Cardamom</span>
             <span class="tile-value">Estate-grown pods from a known Idukki plot.</span>
         </a>
-        <a id="product-honey" class="handpicked-tile" style="background-image:url('images/honey.jpg');">
+        <a id="product-honey" class="handpicked-tile" href="honey.html" style="background-image:url('images/honey.jpg');">
             <span class="tile-badge">Naturally Pure</span>
             <span class="tile-name">Honey</span>
             <span class="tile-value">Collected with minimal processing and no additives.</span>
         </a>
-        <a id="product-tea" class="handpicked-tile" style="background-image:url('images/tea.jpg');">
+        <a id="product-tea" class="handpicked-tile" href="tea.html" style="background-image:url('images/tea.jpg');">
             <span class="tile-badge">Farm Fresh</span>
             <span class="tile-name">Tea</span>
             <span class="tile-value">Packed close to harvest for clean highland aroma.</span>
         </a>
-        <a id="product-coffee" class="handpicked-tile" style="background-image:url('images/coffee1.jpg');">
+        <a id="product-coffee" class="handpicked-tile" href="coffee.html" style="background-image:url('images/coffee1.jpg');">
             <span class="tile-badge">Fair Grown</span>
             <span class="tile-name">Coffee</span>
             <span class="tile-value">Grown through long-standing estate partnerships.</span>
         </a>
-        <a id="product-black-pepper" class="handpicked-tile" style="background-image:url('images/plantation14.jpg');">
+        <a id="product-black-pepper" class="handpicked-tile" href="pepper.html" style="background-image:url('images/pepper1.jpg');">
             <span class="tile-badge">Quality Checked</span>
             <span class="tile-name">Black Pepper</span>
             <span class="tile-value">Selected for bold aroma, clean bite, and consistency.</span>
         </a>
-        <a id="product-cloves" class="handpicked-tile" style="background-image:url('images/plantation13.jpg');">
+        <a id="product-cloves" class="handpicked-tile" href="cloves.html" style="background-image:url('images/plantation13.jpg');">
             <span class="tile-badge">Sustainable</span>
             <span class="tile-name">Cloves</span>
             <span class="tile-value">Harvested with low-waste, soil-conscious practices.</span>
         </a>
-        <a id="product-turmeric" class="handpicked-tile" style="background-image:url('images/plantation16.jpg');">
+        <a id="product-turmeric" class="handpicked-tile" href="turmeric.html" style="background-image:url('images/plantation16.jpg');">
             <span class="tile-badge">Soil First</span>
             <span class="tile-name">Turmeric</span>
             <span class="tile-value">Raised with natural inputs for rich color and purity.</span>
         </a>
     </div>
+    <div class="handpicked-detail" id="handpicked-detail" hidden></div>
 </section>
 
 
@@ -752,8 +753,9 @@
     <footer id="contact">
         <div class="footer-grid">
             <div class="footer-brand">
-                <h3>🌿 Vrindhavanam Estate Heritage Since 1932</h3>
-                <small>Heritage Since 1932 · Kerala, India</small>
+                <h3>🌿 <span class="brand-lockup"><span class="brand-title">Vrindhavanam Estate</span><span
+                            class="brand-subtitle">Heritage Since 1932</span></span></h3>
+                <small>IDUKKI, INDIA</small>
                 <p>Three generations of honest farming. From our mist-wrapped hills to your kitchen — with nothing to
                     hide and everything to share.</p>
                 <div class="newsletter-row">
@@ -784,16 +786,17 @@
             <div class="footer-col">
                 <h4>Contact</h4>
                 <ul>
-                    <li><a href="tel:+919876543210">+91 98765 43210</a></li>
-                    <li><a href="mailto:hello@vrindhavanamspice.com">hello@vrindhavanamspice.com</a></li>
-                    <li><a href="#">Vrindhavanam Estate, Idukki</a></li>
-                    <li><a href="#">Kerala – 685 515</a></li>
+                    <li><a href="tel:9400890000">9400890000</a></li>
+                    <li><a href="tel:9400780000">9400780000</a></li>
+                    <li><a href="mailto:vrindavanam.com">vrindavanam.com</a></li>
+                    <li><a href="#">Vrindhavanam Estate, Vandenmedu, Idukki-685551</a></li>
                     <li><a href="#" onclick="showToast('Opening WhatsApp...')">💬 WhatsApp Us</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <div class="footer-copy">© 2025 Vrindhavanam Estate Heritage Since 1932. All rights reserved. | Crafted with love in Kerala.
+            <div class="footer-copy">© 2025 <span class="brand-lockup"><span class="brand-title">Vrindhavanam Estate</span><span
+                        class="brand-subtitle">Heritage Since 1932</span></span>. All rights reserved. | Crafted with love in Kerala.
             </div>
             <div class="footer-socials">
                 <a href="#">Instagram</a>

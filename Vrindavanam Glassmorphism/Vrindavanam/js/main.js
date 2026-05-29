@@ -180,6 +180,167 @@ function connectWhyProduct(event, targetId, message) {
     }
 }
 
+const handpickedProducts = {
+    cardamom: {
+        title: 'Cardamom',
+        kicker: 'Single Origin Collection',
+        overview: 'Estate-grown cardamom selected for clean eucalyptus aroma, bright sweetness, and a long highland finish.',
+        image: 'images/plantation17.jpg',
+        varieties: [
+            { title: 'Estate Green Pods', label: 'Whole Pods', image: 'images/plantation17.jpg' },
+            { title: 'Reserve Micro-Lot', label: 'Small Batch', image: 'images/plantation11.jpg' },
+            { title: 'Kitchen Grade Select', label: 'Daily Use', image: 'images/plantation12.jpg' },
+        ],
+    },
+    honey: {
+        title: 'Honey',
+        kicker: 'Naturally Pure Collection',
+        overview: 'Raw forest honey collected with minimal processing so the floral aroma and natural body stay intact.',
+        image: 'images/honey.jpg',
+        varieties: [
+            { title: 'Wild Forest Honey', label: 'Raw', image: 'images/honey.jpg' },
+            { title: 'Highland Blossom', label: 'Floral', image: 'images/beautiful1.jpg' },
+            { title: 'Estate Golden Jar', label: 'Limited', image: 'images/beautiful3.jpg' },
+        ],
+    },
+    tea: {
+        title: 'Tea',
+        kicker: 'Farm Fresh Collection',
+        overview: 'Highland tea packed close to harvest for a clean cup, soft tannins, and a fresh estate aroma.',
+        image: 'images/tea.jpg',
+        varieties: [
+            { title: 'Highland Black Tea', label: 'Bold', image: 'images/tea.jpg' },
+            { title: 'Morning Leaf', label: 'Fresh', image: 'images/plantation3.jpg' },
+            { title: 'Estate Breakfast', label: 'Classic', image: 'images/beautiful.jpg' },
+        ],
+    },
+    coffee: {
+        title: 'Coffee',
+        kicker: 'Fair Grown Collection',
+        overview: 'Estate-partnered coffee with a rounded body, gentle spice, and careful post-harvest handling.',
+        image: 'images/coffee1.jpg',
+        varieties: [
+            { title: 'Estate Roast', label: 'Medium', image: 'images/coffee1.jpg' },
+            { title: 'Monsoon Blend', label: 'Deep', image: 'images/coffee.jpg' },
+            { title: 'Highland Bean', label: 'Aromatic', image: 'images/plantation8.jpg' },
+        ],
+    },
+    blackPepper: {
+        title: 'Black Pepper',
+        kicker: 'Quality Checked Collection',
+        overview: 'Bold peppercorns selected for heat, clean bite, and the warm aromatic lift expected from Kerala vines.',
+        image: 'images/plantation14.jpg',
+        varieties: [
+            { title: 'Malabar Bold', label: 'Whole', image: 'images/plantation14.jpg' },
+            { title: 'Vine-Ripened Select', label: 'Premium', image: 'images/plantation15.jpg' },
+            { title: 'Kitchen Crack Pepper', label: 'Everyday', image: 'images/plantation19.jpg' },
+        ],
+    },
+    cloves: {
+        title: 'Cloves',
+        kicker: 'Sustainable Collection',
+        overview: 'Cloves harvested with low-waste practices and cured for deep warmth, sweetness, and lasting aroma.',
+        image: 'images/plantation13.jpg',
+        varieties: [
+            { title: 'Wild Cloves', label: 'Whole Buds', image: 'images/plantation13.jpg' },
+            { title: 'Aroma Reserve', label: 'Intense', image: 'images/plantation20.jpg' },
+            { title: 'Culinary Select', label: 'Balanced', image: 'images/plantation23.jpg' },
+        ],
+    },
+    turmeric: {
+        title: 'Turmeric',
+        kicker: 'Soil First Collection',
+        overview: 'Naturally raised turmeric with rich color, earthy sweetness, and careful drying for kitchen-ready purity.',
+        image: 'images/plantation16.jpg',
+        varieties: [
+            { title: 'Golden Root', label: 'Whole', image: 'images/plantation16.jpg' },
+            { title: 'Curcumin Rich', label: 'Bright', image: 'images/plantation25.jpg' },
+            { title: 'Kitchen Powder Grade', label: 'Fine', image: 'images/plantation27.jpg' },
+        ],
+    },
+};
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    })[char]);
+}
+
+function renderHandpickedDetail(productKey, sourceTile) {
+    const detail = document.getElementById('handpicked-detail');
+    const product = handpickedProducts[productKey];
+    if (!detail || !product) return;
+
+    if (sourceTile && sourceTile.parentElement) {
+        sourceTile.after(detail);
+    }
+
+    document.querySelectorAll('.handpicked-tile').forEach(tile => {
+        const isActive = tile === sourceTile;
+        tile.classList.toggle('is-active', isActive);
+        tile.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+    });
+
+    const varieties = product.varieties.map(variety => `
+        <div class="handpicked-variety-tile" style="--detail-image: url('${escapeHtml(variety.image)}');">
+            <span class="handpicked-variety-label">${escapeHtml(variety.label)}</span>
+            <span class="handpicked-variety-title">${escapeHtml(variety.title)}</span>
+        </div>
+    `).join('');
+
+    detail.innerHTML = `
+        <div class="handpicked-detail-shell">
+            <div class="handpicked-detail-head">
+                <div>
+                    <div class="handpicked-detail-kicker">${escapeHtml(product.kicker)}</div>
+                    <div class="handpicked-detail-title">${escapeHtml(product.title)} Varieties</div>
+                </div>
+                <button class="handpicked-detail-close" type="button" aria-label="Close handpicked details">x</button>
+            </div>
+            <div class="handpicked-variety-grid">
+                ${varieties}
+            </div>
+            <div class="handpicked-main-tile" style="--detail-image: url('${escapeHtml(product.image)}');">
+                <span class="handpicked-main-label">Main Product</span>
+                <span class="handpicked-main-title">${escapeHtml(product.title)} Overview</span>
+                <p class="handpicked-main-copy">${escapeHtml(product.overview)}</p>
+            </div>
+        </div>
+    `;
+
+    detail.hidden = false;
+    requestAnimationFrame(() => detail.classList.add('is-open'));
+
+    const closeButton = detail.querySelector('.handpicked-detail-close');
+    if (closeButton) {
+        closeButton.addEventListener('click', closeHandpickedDetail);
+    }
+
+    detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeHandpickedDetail() {
+    const detail = document.getElementById('handpicked-detail');
+    if (!detail) return;
+
+    detail.classList.remove('is-open');
+    document.querySelectorAll('.handpicked-tile').forEach(tile => {
+        tile.classList.remove('is-active');
+        tile.setAttribute('aria-expanded', 'false');
+    });
+
+    setTimeout(() => {
+        if (!detail.classList.contains('is-open')) {
+            detail.hidden = true;
+            detail.innerHTML = '';
+        }
+    }, 420);
+}
+
 // INIT
 document.addEventListener('DOMContentLoaded', () => {
     // ENTER KEY FOR TRACE
@@ -208,5 +369,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 connect(event);
             }
         });
+    });
+
+    document.querySelectorAll('.handpicked-tile[data-handpicked-product]').forEach(tile => {
+        if (!tile.getAttribute('href') || tile.getAttribute('href').startsWith('#')) {
+            tile.addEventListener('click', event => {
+                event.preventDefault();
+                renderHandpickedDetail(tile.dataset.handpickedProduct, tile);
+            });
+        }
     });
 });

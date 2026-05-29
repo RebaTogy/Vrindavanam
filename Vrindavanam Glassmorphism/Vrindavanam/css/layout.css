@@ -481,7 +481,7 @@ section {
 }
 
 .products-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 2rem; max-width: 1200px; margin: 0 auto;
 }
 
@@ -516,23 +516,33 @@ section {
 /* WHY US SECTION */
 #why {
     position: relative;
-    background: url("../images/beautiful4.jpg") center/cover no-repeat;
+    background: #071007;
     z-index: 1;
     overflow: hidden;
     isolation: isolate;
-    filter: contrast(1.1) brightness(1.05) saturate(1.1);
 }
 
 #why::before {
     content: "";
     position: absolute;
+    inset: -16px;
+    background:
+        radial-gradient(circle at 50% 28%, rgba(212, 175, 55, 0.12), transparent 36%),
+        url("../images/cow1.jpg") center/cover no-repeat;
+    filter: blur(4px) brightness(1.08) contrast(1.12) saturate(1.08);
+    transform: scale(1.025);
+    z-index: -2;
+}
+
+#why::after {
+    content: "";
+    position: absolute;
     inset: 0;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-    background: linear-gradient(
-        rgba(0, 0, 0, 0.25),
-        rgba(0, 0, 0, 0.45)
-    );
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(2, 8, 3, 0.46) 0%, rgba(5, 17, 7, 0.58) 45%, rgba(0, 0, 0, 0.74) 100%),
+        radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.05) 0%, transparent 34%),
+        radial-gradient(circle at 50% 55%, transparent 28%, rgba(0, 0, 0, 0.52) 100%);
     z-index: -1;
 }
 
@@ -553,18 +563,18 @@ section {
 }
 
 #why .why-card {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: var(--cream) !important;
 }
 
 #why .why-card:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
     border-color: rgba(201, 168, 76, 0.5) !important;
 }
 
 #why .why-card.is-linked {
-    background: rgba(201, 168, 76, 0.16) !important;
+    background-color: rgba(201, 168, 76, 0.16) !important;
     border-color: rgba(201, 168, 76, 0.75) !important;
     box-shadow: 0 24px 56px rgba(0, 0, 0, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.24) !important;
     transform: translateY(-6px);
@@ -813,6 +823,7 @@ footer::after {
     .about-visual { order: -1; margin-bottom: 2rem; max-width: 500px; margin: 0 auto; }
     .about-visual-badge { right: 1rem; bottom: 1rem; min-width: 120px; padding: 1rem; }
     .sub-content { grid-template-columns: 1fr; gap: 2rem; }
+    .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
     .metrics-bar { padding: 1.5rem 2rem; }
     .metric-sep { display: none; }
@@ -837,13 +848,17 @@ footer::after {
         line-height: 1.2;
     }
 
-    .nav-logo span {
+    .nav-logo .brand-subtitle {
         font-size: 0.55rem;
     }
 
     .nav-right {
         gap: 0.6rem;
         flex-shrink: 0;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
     }
 
     .cart-btn {
