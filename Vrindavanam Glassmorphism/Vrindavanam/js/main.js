@@ -270,6 +270,11 @@ function escapeHtml(value) {
     })[char]);
 }
 
+function handpickedTileImageStyle(image) {
+    const safeImage = escapeHtml(image);
+    return `--detail-image: url('${safeImage}'); background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(5, 15, 5, 0.72)), url('${safeImage}');`;
+}
+
 function renderHandpickedDetail(productKey, sourceTile) {
     const detail = document.getElementById('handpicked-detail');
     const product = handpickedProducts[productKey];
@@ -286,7 +291,7 @@ function renderHandpickedDetail(productKey, sourceTile) {
     });
 
     const varieties = product.varieties.map(variety => `
-        <div class="handpicked-variety-tile" style="--detail-image: url('${escapeHtml(variety.image)}');">
+        <div class="handpicked-variety-tile" style="${handpickedTileImageStyle(variety.image)}">
             <span class="handpicked-variety-label">${escapeHtml(variety.label)}</span>
             <span class="handpicked-variety-title">${escapeHtml(variety.title)}</span>
         </div>
@@ -304,7 +309,7 @@ function renderHandpickedDetail(productKey, sourceTile) {
             <div class="handpicked-variety-grid">
                 ${varieties}
             </div>
-            <div class="handpicked-main-tile" style="--detail-image: url('${escapeHtml(product.image)}');">
+            <div class="handpicked-main-tile" style="${handpickedTileImageStyle(product.image)}">
                 <span class="handpicked-main-label">Main Product</span>
                 <span class="handpicked-main-title">${escapeHtml(product.title)} Overview</span>
                 <p class="handpicked-main-copy">${escapeHtml(product.overview)}</p>
