@@ -47,12 +47,11 @@ function addToCartFromAPI(productName) {
 
     addToCart(
     `${product.product_name}${product.weight ? ` (${product.weight})` : ""}`,
-    "₹" + product.daily_price,
+    "₹" + Number(product.price).toLocaleString("en-IN"),
     "🌿",
     null
 );
 }
-
 function removeFromCart(name) {
     cart = cart.filter(i => i.name !== name);
     updateCartUI();
@@ -190,6 +189,7 @@ function traceSpice() {
 
 
 // 1. LOAD PRODUCTS FIRST
+// 1. LOAD PRODUCTS FIRST
 document.addEventListener("DOMContentLoaded", () => {
 
     fetch("/api/products")
@@ -200,25 +200,86 @@ document.addEventListener("DOMContentLoaded", () => {
 
         console.log("Products loaded", productsData);
 
-        document.querySelectorAll(".weight-select")
-        .forEach(select => {
+        // Update variety cards
+        document.querySelectorAll(".product-variety-card").forEach(card => {
 
-            const priceBox =
-                select.closest(".product-variety-card")
-                .querySelector(".product-price");
+            const name = card.querySelector(".product-variety-name")
+                .textContent.trim();
 
-            if (priceBox) {
-                updatePrice(select, priceBox.id);
-            }
+            const product = data.find(p => {
 
+                const apiName = p.variety_name.trim();
+
+                return (
+                    apiName === name ||
+                    (apiName === "Biriyani" && name === "Biriyani Cardamom") ||
+                    (apiName === "For Chai" && name === "Chai Cardamom") ||
+                    (apiName === "Open/splits" && name === "Open") ||
+                    (apiName === "Superbold" && name === "Super Bold") ||
+                    (apiName === "Extrabold" && name === "Extra Bold")
+                );
+            });
+        if (product) {
+
+    const displayPrice =
+        "₹" + Number(product.price).toLocaleString("en-IN");
+
+    const varietyPrice =
+        card.querySelector(".product-variety-price");
+
+    if (varietyPrice) {
+        varietyPrice.textContent = displayPrice;
+    }
+
+    const mainPrice =
+        card.querySelector(".product-price");
+
+    if (mainPrice) {
+        mainPrice.textContent = displayPrice;
+    }
+
+    // ADD HERE
+    const select = card.querySelector(".weight-select");
+
+    if (select) {
+
+        const originalWeight =
+            parseFloat(product.weight.replace(/[^\d.]/g, ""));
+
+        const originalPrice =
+            parseFloat(product.price);
+
+        console.log("SELECT FOUND", select);
+
+select.querySelectorAll("option").forEach(option => {
+
+            const selectedWeight =
+                parseFloat(option.value);
+
+            const calculatedPrice =
+                (originalPrice / originalWeight) * selectedWeight;
+
+            option.textContent =
+                `${selectedWeight}g — ₹${Math.round(calculatedPrice).toLocaleString("en-IN")}`;
         });
+    }
+
+    console.log("Updated:", name, product.price);
+}
+        // ADD THIS AFTER THE LOOP
+        /*document.querySelectorAll(".weight-select").forEach(select => {
+
+            const priceId =
+                select.getAttribute("onchange")
+                      .match(/'([^']+)'/)[1];
+
+            updatePrice(select, priceId);
+        });*/
+});
 
     })
     .catch(err => console.log("API Error:", err));
-
 });
-
-
 // 2. PRICE CALC FUNCTION
 function updatePrice(select, priceId) {
 
@@ -228,21 +289,41 @@ function updatePrice(select, priceId) {
     if (!select || !priceEl) return;
 
     const card = select.closest(".product-variety-card");
+
     const productId = card.dataset.productId;
 
+    console.log("CARD PRODUCT ID:", productId);
+
     const product = productsData.find(
-        p => p.product_id === productId
+        p => p.product_id.trim() === productId.trim()
     );
+
+    console.log("FOUND PRODUCT:", product);
 
     if (!product) return;
 
-    const selectedWeight = Number(select.value);
+    console.log("PRODUCT PRICE:", product.price);
+    console.log("PRODUCT WEIGHT:", product.weight);
+
+    console.log("SELECT VALUE =", select.value);
+console.log("SELECT TYPE =", typeof select.value);
+
+const selectedWeight = Number(select.value);
 
     const originalWeight =
-        Number(product.weight.replace(/[^0-9.]/g, ''));
+        parseFloat(product.weight.replace(/[^\d.]/g, ''));
+
+    const originalPrice =
+        parseFloat(product.price);
+
+    console.log("SELECTED WEIGHT:", selectedWeight);
+    console.log("ORIGINAL WEIGHT:", originalWeight);
+    console.log("ORIGINAL PRICE:", originalPrice);
 
     const calculatedPrice =
-        (product.price / originalWeight) * selectedWeight;
+        (originalPrice / originalWeight) * selectedWeight;
+
+    console.log("CALCULATED PRICE:", calculatedPrice);
 
     priceEl.textContent =
         "₹" + Math.round(calculatedPrice).toLocaleString("en-IN");
@@ -594,7 +675,7 @@ function setupAboutRowExchange() {
 document.addEventListener('DOMContentLoaded', () => {
     setupGroupedTileSlider('.why-grid', 4);
     setupAboutRowExchange();
-fetch("/api/products")
+/*fetch("/api/products")
 .then(response => response.json())
 .then(data => {
     productsData = data;
@@ -609,61 +690,73 @@ fetch("/api/products")
             "Price:",
             product.daily_price
         );
-
-        if (product.product_name === "Cardamom") {
-            const el = document.getElementById("prod1price");
-            if (el) el.textContent = "₹" + product.daily_price;
-        }
-
-        if (product.product_name === "Pepper") {
-            const el = document.getElementById("prod2price");
-            if (el) el.textContent = "₹" + product.daily_price;
-        }
-
-        if (product.product_name === "Turmeric") {
-            const el = document.getElementById("prod3price");
-            if (el) el.textContent = "₹" + product.daily_price;
-        }
-
-        if (product.product_name === "Honey") {
-            const el = document.getElementById("prod7price");
-            if (el) el.textContent = "₹" + product.daily_price;
-        }
-
-        if (product.product_name === "Cloves") {
-    const el = document.getElementById("prod4price");
-    if (el) el.textContent = "₹" + product.daily_price;
+if (product.product_name === "Cardamom") {
+    const el = document.getElementById("prod1price");
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
 }
 
-if (product.product_name === "Ginger") {
-    const el = document.getElementById("prod9price");
-    if (el) el.textContent = "₹" + product.daily_price;
+if (product.product_name === "Pepper") {
+    const el = document.getElementById("prod2price");
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
 }
 
-if (product.product_name === "Ghee") {
-    const el = document.getElementById("prod8price");
-    if (el) el.textContent = "₹" + product.daily_price;
-}
-
-if (product.product_name === "Tea") {
-    const el = document.getElementById("prod5price");
-    if (el) el.textContent = "₹" + product.daily_price;
-}
-
-if (product.product_name === "Coffee") {
-    const el = document.getElementById("prod6price");
-    if (el) el.textContent = "₹" + product.daily_price;
+if (product.product_name === "Turmeric") {
+    const el = document.getElementById("prod3price");
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
 }
 
 if (product.product_name === "Honey") {
     const el = document.getElementById("prod7price");
-    if (el) el.textContent = "₹" + product.daily_price;
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
 }
 
+if (product.product_name === "Cloves") {
+    const el = document.getElementById("prod4price");
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
+}
+
+if (product.product_name === "Ginger") {
+    const el = document.getElementById("prod9price");
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
+}
+
+if (product.product_name === "Ghee") {
+    const el = document.getElementById("prod8price");
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
+}
+
+if (product.product_name === "Tea") {
+    const el = document.getElementById("prod5price");
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
+}
+
+if (product.product_name === "Coffee") {
+    const el = document.getElementById("prod6price");
+    if (el)
+        el.textContent =
+            "₹" + Number(product.price).toLocaleString("en-IN");
+}
+        
     });   // closes forEach
 
 })       // closes then(data => ...)
-.catch(error => console.error(error));
+.catch(error => console.error(error));*/
     // ENTER KEY FOR TRACE
     const batchInput = document.getElementById('batchInput');
     const productInput = document.getElementById('productInput');

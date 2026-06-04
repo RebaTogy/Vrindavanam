@@ -18,15 +18,15 @@ function closeCart() {
 }
 
 const varietyCartDefaults = {
-    cardamom: { price: 1240, image: 'images/plantation17.jpg' },
-    pepper: { price: 890, image: 'images/plantation14.jpg' },
-    turmeric: { price: 680, image: 'images/plantation16.jpg' },
-    cloves: { price: 1480, image: 'images/plantation13.jpg' },
-    tea: { price: 450, image: 'images/tea.jpg' },
-    coffee: { price: 620, image: 'images/coffee1.jpg' },
-    honey: { price: 580, image: 'images/honey.jpg' },
-    ghee: { price: 760, image: 'images/ghee1.jpg' },
-    ginger: { price: 360, image: 'images/ginger1.jpg' },
+    cardamom: { image: 'images/plantation17.jpg' },
+    pepper: { image: 'images/plantation14.jpg' },
+    turmeric: { image: 'images/plantation16.jpg' },
+    cloves: { image: 'images/plantation13.jpg' },
+    tea: { image: 'images/tea.jpg' },
+    coffee: { image: 'images/coffee1.jpg' },
+    honey: { image: 'images/honey.jpg' },
+    ghee: { image: 'images/ghee1.jpg' },
+    ginger: { image: 'images/ginger1.jpg' },
 };
 
 const otherHandpickedProducts = [
@@ -617,6 +617,8 @@ function addVarietyTileToCart(button) {
     const pageTitle = document.querySelector('.product-page .section-title')?.textContent || name;
     const category = getVarietyCategory(pageTitle + ' ' + name);
     const defaults = varietyCartDefaults[category];
+    console.log("CATEGORY =", category);
+console.log("NAME =", name);
     const image = card.querySelector('.product-variety-image')?.getAttribute('src') || defaults.image;
 
     const select = card.querySelector('.weight-select');
@@ -797,7 +799,7 @@ function ensureProductVarietyDetailButtons() {
         if (!priceEl) {
             priceEl = document.createElement('span');
             priceEl.className = 'product-variety-price';
-            priceEl.textContent = formatProductPagePrice(defaults.price);
+            priceEl.textContent = "Loading...";
 
             if (nameEl) {
                 nameEl.insertAdjacentElement('afterend', priceEl);
@@ -836,16 +838,28 @@ function ensureProductVarietyDetailButtons() {
                 { weight: '1kg', multiplier: 3.2 }
             ];
             
-            weightOptions.forEach(opt => {
-                const optEl = document.createElement('option');
-                const calculatedPrice = Math.round(defaults.price * opt.multiplier);
-                optEl.value = calculatedPrice;
-                optEl.textContent = `${opt.weight} — ${formatProductPagePrice(calculatedPrice)}`;
-                if (opt.weight === '250g') {
-                    optEl.selected = true;
-                }
-                select.appendChild(optEl);
-            });
+           weightOptions.forEach(opt => {
+
+    const optEl = document.createElement('option');
+
+    const weightNumber =
+        parseFloat(opt.weight.replace(/[^\d.]/g, ''));
+
+    const calculatedPrice =
+        Math.round(defaults.price * opt.multiplier);
+
+    optEl.value = weightNumber;
+
+    optEl.textContent =
+        `${opt.weight} — ${formatProductPagePrice(calculatedPrice)}`;
+
+    if (opt.weight === '250g') {
+        optEl.selected = true;
+    }
+
+    select.appendChild(optEl);
+
+});
             
             select.addEventListener('change', () => {
                 priceEl.textContent = formatProductPagePrice(select.value);
@@ -939,15 +953,28 @@ function renderProductDetailPage() {
         ];
         
         weightOptions.forEach(opt => {
-            const optEl = document.createElement('option');
-            const calculatedPrice = Math.round(product.price * opt.multiplier);
-            optEl.value = calculatedPrice;
-            optEl.textContent = `${opt.weight} — ${formatProductPagePrice(calculatedPrice)}`;
-            if (opt.weight === '250g') {
-                optEl.selected = true;
-            }
-            select.appendChild(optEl);
-        });
+    const optEl = document.createElement('option');
+
+    const weightNumber =
+        parseFloat(opt.weight.replace(/[^\d.]/g, ''));
+
+    console.log("CATEGORY =", category);
+    console.log("DEFAULTS =", defaults);
+
+    const calculatedPrice =
+        Math.round(Number(defaults.price) * opt.multiplier);
+
+    optEl.value = weightNumber;
+
+    optEl.textContent =
+        `${opt.weight} — ${formatProductPagePrice(calculatedPrice)}`;
+
+    if (opt.weight === '250g') {
+        optEl.selected = true;
+    }
+
+    select.appendChild(optEl);
+});
 
         // Set initial price to matches default 250g option (multiplier 1.0)
         if (price) price.textContent = formatProductPagePrice(product.price);
