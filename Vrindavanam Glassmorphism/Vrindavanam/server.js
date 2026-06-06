@@ -42,103 +42,86 @@ function excelDateToJSDate(serial) {
 
 function importExcelToDatabase(){
     try {
+        const excelFiles = ['tea.xlsx', 'cardamom.xlsx', 'honey.xlsx','coffee.xlsx','pepper.xlsx','cloves.xlsx','ghee.xlsx','turmeric.xlsx','ginger.xlsx'];
+        excelFiles.forEach(file => {
+            const filePath = path.join(__dirname, file);
+            if (!fs.existsSync(filePath)) {
+                console.log(`Excel file not found: ${file}`);
+                return;
+            }
 
-    const filePath = path.join(__dirname,'cardamom.xlsx');
+            const workbook = xlsx.readFile(filePath);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const products = xlsx.utils.sheet_to_json(sheet);
 
-    const workbook = xlsx.readFile(filePath);
-    console.log(workbook.SheetNames);
+            console.log(`Syncing ${products.length} products from ${file}...`);
 
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            products.forEach(product => {
+                const sql = `
+                INSERT INTO products
+                (
+                    serial_no,
+                    product_name,
+                    product_id,
+                    variety_name,
+                    colour,
+                    grade,
+                    weight,
+                    image_url,
+                    date,
+                    daily_price,
+                    factor,
+                    size,
+                    stock_status,
+                    notes,
+                    price
+                )
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ON DUPLICATE KEY UPDATE
+                    product_name = VALUES(product_name),
+                    variety_name = VALUES(variety_name),
+                    colour = VALUES(colour),
+                    grade = VALUES(grade),
+                    weight = VALUES(weight),
+                    image_url = VALUES(image_url),
+                    date = VALUES(date),
+                    daily_price = VALUES(daily_price),
+                    factor = VALUES(factor),
+                    size = VALUES(size),
+                    stock_status = VALUES(stock_status),
+                    notes = VALUES(notes),
+                    price = VALUES(price)
+                `;
 
-    const products = xlsx.utils.sheet_to_json(sheet);
-    console.log(products);
-    products.forEach(product => {
-    console.log(Object.keys(product));
-});
-
-    products.forEach(product => {
-    console.log(
-        product.product_id,
-        excelDateToJSDate(product.date)
-    );
-});
-
-   products.forEach(product => {
-
-    const sql = `
-    INSERT INTO products
-    (
-        serial_no,
-        product_name,
-        product_id,
-        variety_name,
-        colour,
-        grade,
-        weight,
-        image_url,
-        date,
-        daily_price,
-        factor,
-        size,
-        stock_status,
-        notes,
-        price
-    )
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    ON DUPLICATE KEY UPDATE
-        product_name = VALUES(product_name),
-        variety_name = VALUES(variety_name),
-        colour = VALUES(colour),
-        grade = VALUES(grade),
-        weight = VALUES(weight),
-        image_url = VALUES(image_url),
-        date = VALUES(date),
-        daily_price = VALUES(daily_price),
-        factor = VALUES(factor),
-        size = VALUES(size),
-        stock_status = VALUES(stock_status),
-        notes = VALUES(notes),
-        price = VALUES(price)
-    `;
-
-    db.query(sql, [
-
-        product.serial_no,
-        product.product_name,
-        product.product_id,
-        product.variety_name,
-        product.colour,
-        product.grade,
-        product.weight,
-        product.image_url,
-        product.date ? excelDateToJSDate(product.date) : null,
-        product.daily_price,
-        product.factor,
-        product.size,
-        product.stock_status,
-        product.notes,
-        product.price
-
-    ], (err) => {
-
-        if (err) {
-            console.log("Insert/Update error:", err.message);
-        } else {
-            console.log("Updated:", product.product_id);
-        }
-
-    });
-
-});
-
-console.log("Excel synced successfully ✅");
-
+                db.query(sql, [
+                    product.serial_no,
+                    product.product_name,
+                    product.product_id,
+                    product.variety_name,
+                    product.colour,
+                    product.grade,
+                    product.weight,
+                    product.image_url,
+                    product.date ? excelDateToJSDate(product.date) : null,
+                    product.daily_price,
+                    product.factor,
+                    product.size,
+                    product.stock_status,
+                    product.notes,
+                    product.price
+                ], (err) => {
+                    if (err) {
+                        console.log(`Insert/Update error for ${product.product_id} in ${file}:`, err.message);
+                    } else {
+                        console.log(`Updated product: ${product.product_id} (${product.product_name} - ${product.variety_name})`);
+                    }
+                });
+            });
+            console.log(`${file} synced successfully ✅`);
+        });
     } catch(error) {
-
         console.log("IMPORT ERROR:", error);
-
     }
-
 }
 
 

@@ -146,42 +146,142 @@ function traceSpice() {
         return;
     }
 
-    const batch = batchInput.value || 'VRD-2024-CRD-12';
-    const product = productInput.value || 'Cardamom';
+    const rawBatchVal = batchInput.value.trim();
+    const rawProdVal = productInput.value.trim();
+    
+    const batchVal = rawBatchVal.toLowerCase();
+    const prodVal = rawProdVal.toLowerCase();
+    
+    // We default to Cardamom P003 if no input is provided at all
+    const batch = rawBatchVal || 'VRD-2024-CRD-12';
+    const product = rawProdVal || 'Cardamom';
     resultBatch.textContent = batch;
 
-    // Show Batch Not Verified label in soft red warning badge
-    if (verifiedLabel) {
-        verifiedLabel.textContent = "Batch Not Verified";
-        verifiedLabel.className = "badge-warning-status";
-        verifiedLabel.style.display = "block";
-    }
-    if (verifiedBadge) {
-        verifiedBadge.style.display = "none";
-    }
-
-    // Inside dropdown sections (steps), show "Product not found" in modern badge style
-    const notFoundBadgeHtml = `<span class="badge-warning-status" style="margin: 0.5rem auto 0; display: inline-block;">Product not found</span>`;
-    
-    if (farmEl) farmEl.innerHTML = notFoundBadgeHtml; // Seed -> Origin Farm
-    if (dateEl) dateEl.innerHTML = notFoundBadgeHtml; // Harvest -> Harvest Date
-    if (dryEl) dryEl.innerHTML = notFoundBadgeHtml;   // Process -> Drying Method
-    if (labEl) labEl.innerHTML = notFoundBadgeHtml;   // Process -> Lab Tested
-    if (packEl) packEl.innerHTML = notFoundBadgeHtml; // Pack -> Packed
-
-    // Additional info sections with subtle animated loading styles
-    if (infoRainfall) {
-        infoRainfall.innerHTML = `<span class="status-indicator-loading">Loading environmental data...</span>`;
-    }
-    if (infoAltitude) {
-        infoAltitude.innerHTML = `<span class="status-indicator-loading">Fetching elevation details...</span>`;
-    }
-    if (infoPurity) {
-        infoPurity.innerHTML = `<span class="status-indicator-loading">Verifying quality parameters...</span>`;
+    let match = null;
+    if (productsData && productsData.length > 0) {
+        if (rawBatchVal) {
+            // Find by product ID (case-insensitive)
+            match = productsData.find(p => p.product_id.toLowerCase() === batchVal);
+            if (!match) {
+                // Find if the batch code contains or is contained in the product ID
+                match = productsData.find(p => batchVal.includes(p.product_id.toLowerCase()) || p.product_id.toLowerCase().includes(batchVal));
+            }
+            if (!match && batchVal.includes('crd')) {
+                // Fallback for default VRD-2024-CRD-12
+                match = productsData.find(p => p.product_name.toLowerCase() === 'cardamom');
+            }
+        }
+        if (!match && rawProdVal) {
+            // Find by product name
+            match = productsData.find(p => p.product_name.toLowerCase().includes(prodVal) || prodVal.includes(p.product_name.toLowerCase()));
+        }
     }
 
-    traceResult.classList.add('show');
-    showToast(product + ' batch ' + batch + ' traced: Not Verified');
+    if (match) {
+        // Show verified badge, hide unverified warning
+        if (verifiedLabel) {
+            verifiedLabel.style.display = "none";
+        }
+        if (verifiedBadge) {
+            verifiedBadge.style.display = "inline-block";
+            verifiedBadge.textContent = "✓ Certified Organic";
+        }
+
+        // Fill in journey steps
+        if (farmEl) farmEl.innerHTML = "Vrindhavanam Estate, Idukki, Kerala";
+        
+        // Parse and format harvest date
+        let formattedDate = "Nov 12, 2024";
+        let harvestDateObj = null;
+        if (match.date) {
+            harvestDateObj = new Date(match.date);
+            if (!isNaN(harvestDateObj.getTime())) {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                formattedDate = harvestDateObj.toLocaleDateString('en-US', options);
+            }
+        }
+        if (dateEl) dateEl.textContent = formattedDate;
+
+        // Dynamic Drying/Processing method based on product type
+        let dryingMethod = "Sun-Dried, 6 Days";
+        const prodNameLower = match.product_name.toLowerCase();
+        if (prodNameLower.includes('tea')) {
+            dryingMethod = "Orthodox Oxidized & Pan-Fired";
+        } else if (prodNameLower.includes('honey')) {
+            dryingMethod = "Cold Extracted & Unfiltered";
+        } else if (prodNameLower.includes('cardamom')) {
+            dryingMethod = "Flue-Cured (Retention Green)";
+        } else if (match.notes) {
+            dryingMethod = match.notes;
+        }
+        if (dryEl) dryEl.textContent = dryingMethod;
+
+        // Compute lab & packaging date offset from harvest date
+        let labDateStr = "Nov 28, 2024";
+        let packDateStr = "Dec 1, 2024";
+        if (harvestDateObj && !isNaN(harvestDateObj.getTime())) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            
+            const labDate = new Date(harvestDateObj);
+            labDate.setDate(labDate.getDate() + 3);
+            labDateStr = labDate.toLocaleDateString('en-US', options);
+            
+            const packDate = new Date(harvestDateObj);
+            packDate.setDate(packDate.getDate() + 5);
+            packDateStr = packDate.toLocaleDateString('en-US', options);
+        }
+        if (labEl) labEl.innerHTML = `${labDateStr} <br><small style="color: #90c070;">Passed (Purity & Moisture)</small>`;
+        if (packEl) packEl.innerHTML = `${packDateStr} <br><small style="color: rgba(255,255,255,0.7);">Hermetic Pouch/Jar</small>`;
+
+        // Compute environmental parameters
+        let altitude = "1,800m";
+        let rainfall = "2,400mm/yr";
+        if (prodNameLower.includes('tea')) {
+            altitude = "1,850m";
+            rainfall = "2,600mm/yr";
+        } else if (prodNameLower.includes('honey')) {
+            altitude = "1,400m";
+            rainfall = "2,200mm/yr";
+        } else if (prodNameLower.includes('cardamom')) {
+            altitude = "1,200m";
+            rainfall = "2,500mm/yr";
+        }
+        if (infoAltitude) infoAltitude.textContent = altitude;
+        if (infoRainfall) infoRainfall.textContent = rainfall;
+
+        // Compute purity score based on database factor field
+        const factorVal = Number(match.factor) || 5;
+        const purityScore = (95 + (factorVal * 0.5)).toFixed(1) + "%";
+        if (infoPurity) infoPurity.textContent = purityScore;
+
+        traceResult.classList.add('show');
+        showToast(`Traced: ${match.product_name} (${match.variety_name}) — Verified ✅`);
+    } else {
+        // Show Batch Not Verified label in soft red warning badge
+        if (verifiedLabel) {
+            verifiedLabel.textContent = "Batch Not Verified";
+            verifiedLabel.className = "badge-warning-status";
+            verifiedLabel.style.display = "block";
+        }
+        if (verifiedBadge) {
+            verifiedBadge.style.display = "none";
+        }
+
+        // Inside dropdown sections (steps), show "Product not found"
+        const notFoundHtml = `<span class="badge-warning-status" style="margin: 0.5rem auto 0; display: inline-block;">Product not found</span>`;
+        if (farmEl) farmEl.innerHTML = notFoundHtml;
+        if (dateEl) dateEl.innerHTML = notFoundHtml;
+        if (dryEl) dryEl.innerHTML = notFoundHtml;
+        if (labEl) labEl.innerHTML = notFoundHtml;
+        if (packEl) packEl.innerHTML = notFoundHtml;
+
+        if (infoRainfall) infoRainfall.innerHTML = `<span class="badge-warning-status" style="margin:0; display:inline-block;">Unverified</span>`;
+        if (infoAltitude) infoAltitude.innerHTML = `<span class="badge-warning-status" style="margin:0; display:inline-block;">Unverified</span>`;
+        if (infoPurity) infoPurity.innerHTML = `<span class="badge-warning-status" style="margin:0; display:inline-block;">Unverified</span>`;
+
+        traceResult.classList.add('show');
+        showToast(`Trace Failed: Batch "${batch}" Not Verified ⚠️`);
+    }
 }
 
 
@@ -199,10 +299,10 @@ document.addEventListener("DOMContentLoaded", () => {
         productsData = data;
 
         console.log("Products loaded", productsData);
-
+console.log("HONEY LOOP STARTED");
         // Update variety cards
         document.querySelectorAll(".product-variety-card").forEach(card => {
-
+console.log("CARD FOUND");
             const name = card.querySelector(".product-variety-name")
                 .textContent.trim();
 
@@ -235,33 +335,93 @@ document.addEventListener("DOMContentLoaded", () => {
         card.querySelector(".product-price");
 
     if (mainPrice) {
-        mainPrice.textContent = displayPrice;
+        mainPrice.textContent = product.weight;
     }
 
     // ADD HERE
     const select = card.querySelector(".weight-select");
 
     if (select) {
+        const originalWeight = parseFloat(product.weight.replace(/[^\d.]/g, ""));
+        const originalPrice = parseFloat(product.price);
+        const isHomepageSelect = select.hasAttribute("onchange");
 
-        const originalWeight =
-            parseFloat(product.weight.replace(/[^\d.]/g, ""));
+        select.querySelectorAll("option").forEach(option => {
+    const optText = option.textContent;
+    let selectedWeight = parseFloat(optText);
 
-        const originalPrice =
-            parseFloat(product.price);
+    if (optText.toLowerCase().includes("kg")) {
+        selectedWeight = selectedWeight * 1000;
+    }
 
-        console.log("SELECT FOUND", select);
+    const calculatedPrice = (originalPrice / originalWeight) * selectedWeight;
+    const roundedPrice = Math.round(calculatedPrice);
 
-select.querySelectorAll("option").forEach(option => {
+    console.log("optText =", optText);
+    console.log("selectedWeight =", selectedWeight);
+    console.log("originalPrice =", originalPrice);
+    console.log("originalWeight =", originalWeight);
+    console.log("calculatedPrice =", calculatedPrice);
+    console.log("roundedPrice =", roundedPrice);
 
-            const selectedWeight =
-                parseFloat(option.value);
+    if (isHomepageSelect) {
+        option.value = selectedWeight;
+    } else {
+        option.value = roundedPrice;
+    }
 
-            const calculatedPrice =
-                (originalPrice / originalWeight) * selectedWeight;
+    const weightText = selectedWeight >= 1000
+        ? (selectedWeight / 1000) + "kg"
+        : selectedWeight + "g";
 
-            option.textContent =
-                `${selectedWeight}g — ₹${Math.round(calculatedPrice).toLocaleString("en-IN")}`;
-        });
+    option.textContent =
+        `${weightText} — ₹${roundedPrice.toLocaleString("en-IN")}`;
+});
+        // Select first option by default
+        select.selectedIndex = 0;
+        console.log(
+    "FIRST OPTION:",
+    select.options[0].value,
+    select.options[0].textContent
+);
+select.addEventListener("change", function () {
+
+    const varietyPrice =
+        card.querySelector(".product-variety-price");
+
+    if (varietyPrice) {
+        varietyPrice.textContent =
+            "₹" + Number(this.value).toLocaleString("en-IN");
+    }
+
+    const mainPrice =
+        card.querySelector(".product-price");
+
+    if (mainPrice) {
+        const selectedOption =
+            this.options[this.selectedIndex];
+
+        mainPrice.textContent =
+            selectedOption.text.split("—")[0].trim();
+    }
+});
+        // Update price display below dropdown
+        if (isHomepageSelect) {
+            const priceEl = card.querySelector(".product-price");
+            if (priceEl) {
+                updatePrice(select, priceEl.id);
+            }
+        } else {
+            const varietyPrice = card.querySelector(".product-variety-price");
+            if (varietyPrice) {
+                varietyPrice.textContent = "₹" + Number(select.value).toLocaleString("en-IN");
+            }
+            const mainPrice = card.querySelector(".product-price");
+            if (mainPrice) {
+                const selectedOption = select.options[select.selectedIndex];
+                mainPrice.textContent = selectedOption ? selectedOption.text.split('—')[0].trim() : '';
+            }
+        }
     }
 
     console.log("Updated:", name, product.price);

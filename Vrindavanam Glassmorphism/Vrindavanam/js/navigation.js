@@ -820,6 +820,22 @@ function ensureProductVarietyDetailButtons() {
             actions.appendChild(buyButton);
         }
 
+        // Ensure the weight display element (.product-price) exists above the dropdown
+        let productPrice = card.querySelector('.product-price');
+        if (!productPrice) {
+            productPrice = document.createElement('div');
+            productPrice.className = 'product-price';
+            
+            const existingSelect = card.querySelector('.weight-select');
+            if (existingSelect) {
+                card.insertBefore(productPrice, existingSelect);
+            } else if (actions) {
+                card.insertBefore(productPrice, actions);
+            } else {
+                card.appendChild(productPrice);
+            }
+        }
+
         // Add dropdown if not present
         let select = card.querySelector('.weight-select');
         if (!select) {
@@ -838,32 +854,32 @@ function ensureProductVarietyDetailButtons() {
                 { weight: '1kg', multiplier: 3.2 }
             ];
             
-           weightOptions.forEach(opt => {
-
-    const optEl = document.createElement('option');
-
-    const weightNumber =
-        parseFloat(opt.weight.replace(/[^\d.]/g, ''));
-
-    const calculatedPrice =
-        Math.round(defaults.price * opt.multiplier);
-
-    optEl.value = weightNumber;
-
-    optEl.textContent =
-        `${opt.weight} — ${formatProductPagePrice(calculatedPrice)}`;
-
-    if (opt.weight === '250g') {
-        optEl.selected = true;
-    }
-
-    select.appendChild(optEl);
-
-});
-            
-            select.addEventListener('change', () => {
-                priceEl.textContent = formatProductPagePrice(select.value);
+            weightOptions.forEach((opt, idx) => {
+                const optEl = document.createElement('option');
+                const calculatedPrice = Math.round(defaults.price * opt.multiplier);
+                optEl.value = calculatedPrice;
+                optEl.textContent = `${opt.weight} — ${formatProductPagePrice(calculatedPrice)}`;
+                if (idx === 0) {
+                    optEl.selected = true;
+                }
+                select.appendChild(optEl);
             });
+            
+            const updateCardPrices = () => {
+                const selectedOption = select.options[select.selectedIndex];
+                const weightText = selectedOption ? selectedOption.text.split('—')[0].trim() : '';
+                const selectedPrice = formatProductPagePrice(select.value);
+                
+                if (productPrice) {
+                    productPrice.textContent = weightText;
+                }
+                if (priceEl) {
+                    priceEl.textContent = selectedPrice;
+                }
+            };
+            
+            select.addEventListener('change', updateCardPrices);
+            updateCardPrices();
             
             if (actions) {
                 card.insertBefore(select, actions);
@@ -952,32 +968,20 @@ function renderProductDetailPage() {
             { weight: '1kg', multiplier: 3.2 }
         ];
         
-        weightOptions.forEach(opt => {
-    const optEl = document.createElement('option');
+        weightOptions.forEach((opt, idx) => {
+            const optEl = document.createElement('option');
+            const weightNumber = parseFloat(opt.weight.replace(/[^\d.]/g, ''));
+            const calculatedPrice = Math.round(Number(product.price) * opt.multiplier);
+            optEl.value = calculatedPrice;
+            optEl.textContent = `${opt.weight} — ${formatProductPagePrice(calculatedPrice)}`;
+            if (idx === 0) {
+                optEl.selected = true;
+            }
+            select.appendChild(optEl);
+        });
 
-    const weightNumber =
-        parseFloat(opt.weight.replace(/[^\d.]/g, ''));
-
-    console.log("CATEGORY =", category);
-    console.log("DEFAULTS =", defaults);
-
-    const calculatedPrice =
-        Math.round(Number(defaults.price) * opt.multiplier);
-
-    optEl.value = weightNumber;
-
-    optEl.textContent =
-        `${opt.weight} — ${formatProductPagePrice(calculatedPrice)}`;
-
-    if (opt.weight === '250g') {
-        optEl.selected = true;
-    }
-
-    select.appendChild(optEl);
-});
-
-        // Set initial price to matches default 250g option (multiplier 1.0)
-        if (price) price.textContent = formatProductPagePrice(product.price);
+        // Set initial price to matches default option (first option)
+        if (price) price.textContent = formatProductPagePrice(select.value);
 
         select.addEventListener('change', () => {
             if (price) price.textContent = formatProductPagePrice(select.value);
