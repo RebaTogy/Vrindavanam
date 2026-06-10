@@ -837,29 +837,12 @@ async function ensureProductVarietyDetailButtons() {
 
 // Use global productsData to populate weight/price options for the details page
 let dbProducts = [];
-
-console.log("PAGE NAME =", name);
-
-if (typeof productsData !== "undefined" && productsData.length) {
-    console.log("FIRST PRODUCT =", productsData[0]);
-}
-
 if (name) {
-    dbProducts = productsData.filter(p => {
-    const v = (p.variety_name || "").toLowerCase();
-    const n = name.toLowerCase();
-
-    return (
-        v === n ||
-        (v === "biriyani" && n === "biriyani cardamom") ||
-        (v === "for chai" && n === "chai cardamom") ||
-        (v === "open/splits" && n === "open") ||
-        (v === "superbold" && n === "super bold") ||
-        (v === "extrabold" && n === "extra bold")
-    );
-});
+    // Filter products matching the current product name from the global productsData
+    dbProducts = productsData.filter(p => p.product_name === name);
 }
 
+// Debug: log matched products for details page (optional)
 console.log("DETAIL PAGE PRODUCTS:", name, dbProducts);
         let actions = card.querySelector('.product-variety-actions');
 
@@ -936,24 +919,13 @@ console.log("BEFORE LOOP", name, dbProducts.length);
 
 dbProducts.forEach((item, idx) => {
     const optEl = document.createElement('option');
-const selectedWeight =
-    parseFloat(item.weight.replace(/[^\d.]/g, ''));
 
-const originalWeight =
-    parseFloat(dbProducts[0].weight.replace(/[^\d.]/g, ''));
+    const actualPrice = item.price || item.daily_price;
 
-const originalPrice =
-    parseFloat(dbProducts[0].price);
+    optEl.value = actualPrice;
+    optEl.textContent =
+        `${item.weight} — ${formatProductPagePrice(actualPrice)}`;
 
-const actualPrice =
-    Math.round(
-        (originalPrice / originalWeight) * selectedWeight
-    );
-
-optEl.value = actualPrice;
-
-optEl.textContent =
-    `${item.weight} — ${formatProductPagePrice(actualPrice)}`;
     if (idx === 0) {
         optEl.selected = true;
     }
@@ -1037,7 +1009,6 @@ async function renderProductDetailPage() {
         productId
             ? await getProductFromDatabase(productId)
             : [];
-            console.table(dbProducts);
 
     console.log("DB PRODUCTS:", dbProducts);
     console.table(dbProducts);
@@ -1118,50 +1089,23 @@ if (select) {
         basePrice = parseFloat(first.price || first.daily_price);
     }
     dbProducts.forEach((item, idx) => {
-    const optEl = document.createElement('option');
-
-const selectedWeightRaw =
-    parseFloat(item.weight.replace(/[^\d.]/g, ''));
-
-const selectedWeight =
-    item.weight.toLowerCase().includes('kg')
-        ? selectedWeightRaw * 1000
-        : selectedWeightRaw;
-
-const originalWeightRaw =
-    parseFloat(dbProducts[0].weight.replace(/[^\d.]/g, ''));
-
-const originalWeight =
-    dbProducts[0].weight.toLowerCase().includes('kg')
-        ? originalWeightRaw * 1000
-        : originalWeightRaw;
-    const originalPrice =
-        parseFloat(dbProducts[0].price);
-
-    const actualPrice =
-        Math.round(
-            (originalPrice / originalWeight) * selectedWeight
-        );
-
-    optEl.value = actualPrice;
-
-    optEl.textContent =
-        `${item.weight} — ${formatProductPagePrice(actualPrice)}`;
-
-    if (idx === 0) {
-        optEl.selected = true;
-    }
-
-    select.appendChild(optEl);
-});
-
+        const optEl = document.createElement('option');
+        const itemWeightRaw = parseFloat(item.weight.replace(/[^\d.]/g, ''));
+        const itemWeight = item.weight.toLowerCase().includes('kg') ? itemWeightRaw * 1000 : itemWeightRaw;
+        const calculatedPrice = baseWeight ? Math.round((basePrice / baseWeight) * itemWeight) : (item.price || item.daily_price);
+        optEl.value = calculatedPrice;
+        optEl.textContent = `${item.weight} — ${formatProductPagePrice(calculatedPrice)}`;
+        if (idx === 0) {
+            optEl.selected = true;
+        }
+        select.appendChild(optEl);
+    });
 
 if (select && select.options.length > 0 && price) {
     price.textContent =
         formatProductPagePrice(select.options[0].value);
 }
 }
-console.log("DB PRODUCTS USED:", dbProducts);
 
     if (buyButton && select) {
         const newBuyButton = buyButton.cloneNode(true);

@@ -58,26 +58,20 @@ function addToCartFromAPI(productName) {
 );
 }
 function removeFromCart(name) {
-
-    if (Array.isArray(window.productPageCart)) {
-        window.productPageCart =
-            window.productPageCart.filter(
-                item => item.name !== name && item.key !== name
-            );
-
-        if (typeof window.saveProductPageCart === 'function') {
-            window.saveProductPageCart();
-        }
-
-        if (typeof window.updateProductPageCartUI === 'function') {
-            window.updateProductPageCartUI();
-        }
-
-        return;
+    // Delegate to navigation cart if available
+    if (typeof window.removeFromCart === 'function' && window.removeFromCart !== removeFromCart) {
+        try { window.removeFromCart(name); return; } catch (e) { /* fallthrough */ }
     }
 
+    // Update legacy cart array
     cart = cart.filter(i => i.name !== name);
     updateCartUI();
+    // Also synchronize with the newer productPageCart if it exists
+    if (Array.isArray(window.productPageCart)) {
+        window.productPageCart = window.productPageCart.filter(item => item.name !== name && item.key !== name);
+        if (typeof window.saveProductPageCart === 'function') window.saveProductPageCart();
+        if (typeof window.updateProductPageCartUI === 'function') window.updateProductPageCartUI();
+    }
 }
 
 function changeQty(name, delta) {
@@ -330,13 +324,8 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(data => {
 
         productsData = data;
-window.productsData = data;
 
-if (typeof ensureProductVarietyDetailButtons === 'function') {
-    ensureProductVarietyDetailButtons();
-}
-
-console.log("Products loaded", productsData);
+        console.log("Products loaded", productsData);
 console.log("HONEY LOOP STARTED");
         // Update variety cards
         document.querySelectorAll(".product-variety-card").forEach(card => {
